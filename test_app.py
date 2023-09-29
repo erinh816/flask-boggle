@@ -37,7 +37,10 @@ class BoggleAppTestCase(TestCase):
 
             self.assertEqual(response.status_code, 200)
             self.assertIn('gameId', json.keys())
+            self.assertIn('')
             self.assertEqual(type(json['board']), list)
+            #TODO:fill out 40 (test for string) and test list of lists
+            #TODO:test gameId is in games {}
 
     def test_api_score_word(self):
         """Test score the word"""
@@ -45,9 +48,18 @@ class BoggleAppTestCase(TestCase):
         with app.test_client() as client:
             new_game_response = client.post('/api/new-game', json={'test':'true'})
 
-            ok_response = client.post('/api/score-word', json={'word':'CAT'}).get_json()
-            not_word_response = client.post('/api/score-word', json={'word':'BOB4'}).get_json()
-            not_on_board_response = client.post('/api/score-word', json={'word':'APPLE'}).get_json()
+            ok_response = client.post(
+                '/api/score-word',
+                json={'word':'CAT'})
+                .get_json()
+            not_word_response = client.post(
+                '/api/score-word',
+                json={'word':'BOB4'})
+                .get_json()
+            not_on_board_response = client.post(
+                '/api/score-word',
+                json={'word':'APPLE'})
+                .get_json()
 
             self.assertEqual(ok_response['result'], 'ok')
             self.assertEqual(not_word_response['result'], 'not-word')

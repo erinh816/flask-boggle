@@ -32,23 +32,26 @@ def new_game():
     game_id = str(uuid4())
     game = BoggleGame()
     games[game_id] = game
+    #TODO: use games {}
     session[GAME_ID_KEY] = game_id
 
+    #TODO:move to test file
     is_test = request.json["test"] == "true"
 
     if is_test:
         game.board = [['C','A','T'],['D','O','G']]
 
 
-    return jsonify({"gameId": game_id, "board": game.board})
+    return jsonify(gameId=game_id, board=game.board)
 
 @app.post("/api/score-word")
 def score_word():
     """Check if the word is valid and score it"""
-
+    #TODO: use games{}
     game = games[session[GAME_ID_KEY]]
     word = request.json[WORD_KEY]
 
+    #TODO:refactor
     in_wordlist = game.is_word_in_word_list(word)
     on_board = game.check_word_on_board(word)
     result_msg = get_result_message(in_wordlist, on_board)
