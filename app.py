@@ -4,7 +4,8 @@ from flask_debugtoolbar import DebugToolbarExtension
 
 from boggle import BoggleGame
 
-GAME_ID_KEY = 'game_id'
+GAME_ID_KEY = "game_id"
+WORD_KEY = "word"
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "something secret"
@@ -39,7 +40,7 @@ def new_game():
 def score_word():
 
     game = games[session[GAME_ID_KEY]]
-    word = request.json["word"]
+    word = request.json[WORD_KEY]
 
     in_wordlist = game.is_word_in_word_list(word)
     on_board = game.check_word_on_board(word)
