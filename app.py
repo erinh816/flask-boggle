@@ -34,7 +34,7 @@ def new_game():
     games[game_id] = game
     session[GAME_ID_KEY] = game_id
 
-    is_test = request.json[“test”] == “true”
+    is_test = request.json["test"] == "true"
 
     if is_test:
         game.board = [['C','A','T'],['D','O','G']]

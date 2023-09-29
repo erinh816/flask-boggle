@@ -32,7 +32,7 @@ class BoggleAppTestCase(TestCase):
         """Test starting a new game."""
 
         with app.test_client() as client:
-            response = client.post('/api/new-game')
+            response = client.post('/api/new-game', json={'test':'false'})
             json = response.get_json()
 
             self.assertEqual(response.status_code, 200)
@@ -43,5 +43,12 @@ class BoggleAppTestCase(TestCase):
         """Test score the word"""
 
         with app.test_client() as client:
-            new_game_response = client.post('/api/new-game')
-            score_word_response = client.post('/api/score-word', json={'word':})
+            new_game_response = client.post('/api/new-game', json={'test':'true'})
+
+            ok_response = client.post('/api/score-word', json={'word':'CAT'}).get_json()
+            not_word_response = client.post('/api/score-word', json={'word':'BOB4'}).get_json()
+            not_on_board_response = client.post('/api/score-word', json={'word':'APPLE'}).get_json()
+
+            self.assertEqual(ok_response['result'], 'ok')
+            self.assertEqual(not_word_response['result'], 'not-word')
+            self.assertEqual(not_on_board_response['result'], 'not-on-board')
