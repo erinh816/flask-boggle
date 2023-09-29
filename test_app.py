@@ -38,3 +38,10 @@ class BoggleAppTestCase(TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertIn('gameId', json.keys())
             self.assertEqual(type(json['board']), list)
+
+    def test_api_score_word(self):
+        """Test score the word"""
+
+        with app.test_client() as client:
+            new_game_response = client.post('/api/new-game')
+            score_word_response = client.post('/api/score-word', json={'word':})

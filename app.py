@@ -34,10 +34,17 @@ def new_game():
     games[game_id] = game
     session[GAME_ID_KEY] = game_id
 
+    is_test = request.json[“test”] == “true”
+
+    if is_test:
+        game.board = [['C','A','T'],['D','O','G']]
+
+
     return jsonify({"gameId": game_id, "board": game.board})
 
 @app.post("/api/score-word")
 def score_word():
+    """Check if the word is valid and score it"""
 
     game = games[session[GAME_ID_KEY]]
     word = request.json[WORD_KEY]
