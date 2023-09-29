@@ -1,8 +1,10 @@
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, render_template, jsonify, session
 from uuid import uuid4
 from flask_debugtoolbar import DebugToolbarExtension
 
 from boggle import BoggleGame
+
+GAME_ID_KEY = 'game_id'
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "something secret"
@@ -29,5 +31,33 @@ def new_game():
     game_id = str(uuid4())
     game = BoggleGame()
     games[game_id] = game
+    session[GAME_ID_KEY] = game_id
 
     return jsonify({"gameId": game_id, "board": game.board})
+
+@app.post("/api/score-word")
+def score_word():
+
+    game = games[session[GAME_ID_KEY]]
+    word = request.json["word"]
+
+    in_wordlist = game.is_word_in_word_list(word)
+    on_board = game.check_word_on_board(word)
+    result_msg = get_result_message(in_wordlist, on_board)
+
+    if result_msg == "ok":
+        score = game.play_and_score_word(word)
+
+    return jsonify({ "result": result_msg })
+
+
+def get_result_message(in_wordlist, on_board):
+    """Takes in in_wordlist (bool) and on_board (bool)
+    and generates a result message."""
+
+    if not in_wordlist:
+        return "not-word"
+    elif not on_board:
+        return "not-on-board"
+    else:
+        return "ok"
