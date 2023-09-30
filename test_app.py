@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from app import app, games
+from app import app, games, WORD_KEY, GAME_ID_KEY
 
 # Make Flask errors be real errors, not HTML pages with error info
 app.config['TESTING'] = True
@@ -32,34 +32,36 @@ class BoggleAppTestCase(TestCase):
         """Test starting a new game."""
 
         with app.test_client() as client:
-            response = client.post('/api/new-game', json={'test':'false'})
+            response = client.post('/api/new-game')
             json = response.get_json()
 
             self.assertEqual(response.status_code, 200)
-            self.assertIn('gameId', json.keys())
-            self.assertIn('')
+            self.assertIn(GAME_ID_KEY, json.keys())
+            self.assertEqual(type(json[GAME_ID_KEY]), str)
+            self.assertIn(json[GAME_ID_KEY], games)
             self.assertEqual(type(json['board']), list)
-            #TODO:fill out 40 (test for string) and test list of lists
-            #TODO:test gameId is in games {}
+            self.assertEqual(type(json['board'][0]), list)
 
     def test_api_score_word(self):
         """Test score the word"""
 
         with app.test_client() as client:
-            new_game_response = client.post('/api/new-game', json={'test':'true'})
+            new_game_response = client.post('/api/new-game')
+
+            game_id = new_game_response.json["gameId"]
+            game = games[game_id]
+
+            game.board = [['C','A','T'],['D','O','G']]
 
             ok_response = client.post(
                 '/api/score-word',
-                json={'word':'CAT'})
-                .get_json()
+                json={GAME_ID_KEY: game_id,WORD_KEY:'CAT'}).get_json()
             not_word_response = client.post(
                 '/api/score-word',
-                json={'word':'BOB4'})
-                .get_json()
+                json={GAME_ID_KEY: game_id,WORD_KEY:'BOB4'}).get_json()
             not_on_board_response = client.post(
                 '/api/score-word',
-                json={'word':'APPLE'})
-                .get_json()
+                json={GAME_ID_KEY: game_id,WORD_KEY:'APPLE'}).get_json()
 
             self.assertEqual(ok_response['result'], 'ok')
             self.assertEqual(not_word_response['result'], 'not-word')

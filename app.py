@@ -4,7 +4,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 
 from boggle import BoggleGame
 
-GAME_ID_KEY = "game_id"
+GAME_ID_KEY = "gameId"
 WORD_KEY = "word"
 
 app = Flask(__name__)
@@ -32,43 +32,19 @@ def new_game():
     game_id = str(uuid4())
     game = BoggleGame()
     games[game_id] = game
-    #TODO: use games {}
-    session[GAME_ID_KEY] = game_id
-
-    #TODO:move to test file
-    is_test = request.json["test"] == "true"
-
-    if is_test:
-        game.board = [['C','A','T'],['D','O','G']]
-
 
     return jsonify(gameId=game_id, board=game.board)
 
 @app.post("/api/score-word")
 def score_word():
     """Check if the word is valid and score it"""
-    #TODO: use games{}
-    game = games[session[GAME_ID_KEY]]
-    word = request.json[WORD_KEY]
+    game = games[request.json[GAME_ID_KEY]]
+    word = request.json[WORD_KEY].upper()
 
-    #TODO:refactor
-    in_wordlist = game.is_word_in_word_list(word)
-    on_board = game.check_word_on_board(word)
-    result_msg = get_result_message(in_wordlist, on_board)
-
-    if result_msg == "ok":
-        score = game.play_and_score_word(word)
-
-    return jsonify({ "result": result_msg })
-
-
-def get_result_message(in_wordlist, on_board):
-    """Takes in in_wordlist (bool) and on_board (bool)
-    and generates a result message."""
-
-    if not in_wordlist:
-        return "not-word"
-    elif not on_board:
-        return "not-on-board"
+    if not game.is_word_in_word_list(word):
+        return jsonify({ "result": "not-word" })
+    elif not game.check_word_on_board(word):
+        return jsonify({ "result": "not-on-board" })
     else:
-        return "ok"
+        score = game.play_and_score_word(word)
+        return jsonify({ "result": "ok" })
